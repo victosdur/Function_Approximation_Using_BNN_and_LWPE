@@ -2,28 +2,28 @@ This repository contains data and experiments associated to the paper: "Barycent
 
 ## Usage
 
-To run the Jupyter notebooks correctly, you need to create a Python virtual environment with version 3.10:
+To run the Jupyter notebooks correctly, you need to create a Python virtual environment (This has been developed with Python3.9.13):
 
 ```bash
-python3 -m venv entorno python=3.10
+virtualenv -p python env
 ```
 
 Next, activate the virtual environment (we use the source command because we are working in WSL):
 
 ```bash
-source entorno/bin/activate
+env\Scripts\activate
 ```
 
 Finally, install the required libraries:
 
 ```bash
-pip install numpy pandas matplotlib tqdm torch gudhi scipy ripser tensorflow
+pip install numpy pandas matplotlib tqdm gudhi tensorflow
 ```
 
-If Jupyter Notebook cannot find a kernel, you may need to update IPython. Run the following command to resolve this issue:
+If Jupyter Notebook cannot find a kernel, you may need to install ipykernel. Run the following command to resolve this issue:
 
 ```bash
-pip install --upgrade ipython
+pip install ipykernel
 ```
 
 ## Repository structure

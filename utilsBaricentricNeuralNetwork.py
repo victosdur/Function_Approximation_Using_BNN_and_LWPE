@@ -5,9 +5,9 @@ from tensorflow .keras.layers import Layer
 
 
 # the BaricentricNeuralNetwork: Tensorflow
-class BaricentricLayerTf(Layer):
+class BaricentricSigmaLayerTf(Layer):
     def __init__(self, points, **kwargs):
-        super(BaricentricLayerTf, self).__init__(**kwargs)
+        super(BaricentricSigmaLayerTf, self).__init__(**kwargs)
         
         # Separate the input(x-coordinates and output values(y-values).
         # self.x_coords = tf.constant([p[0] for p in points], dtype=tf.float32)
@@ -29,23 +29,15 @@ class BaricentricLayerTf(Layer):
             
             # Define contributions by segment
             relu1up = activations.relu(t)  #
-            relu2up = activations.relu(1-relu1up)
-            stepup = tf.cast((-t) >= 0, dtype=tf.float32)
-            if i == 0:
-                stepup = tf.cast((-t) > 0, dtype=tf.float32)
-            else:
-                stepup = tf.cast((-t) >= 0, dtype=tf.float32)
-            
-            relu1ab = activations.relu(1-t)      
-            relu2ab = activations.relu(1-relu1ab)
-            stepab = tf.cast((t-1) >= 0, dtype=tf.float32)
-            if i == num_segments - 1:
-                stepab = tf.cast((t-1) > 0, dtype = tf.float32)
-            else:
-                stepab = tf.cast((t-1) >= 0, dtype=tf.float32)
+            step1 = tf.cast((-t) > 0, dtype=tf.float32)
+            step2 = tf.cast((t - 1) > 0, dtype=tf.float32)
+            relu2up = activations.relu(1-relu1up-2*step1-2*step2)
+
+            relu1ab = activations.relu(1-t)  #
+            relu2ab = activations.relu(1-relu2up-2*step1-2*step2)
             
             # Output for this segment
-            segment_output = (relu2up - stepup) * b_i + (relu2ab - stepab) * b_next
+            segment_output = relu2up* b_i + relu2ab * b_next
             
             # Add the segment contribution to the total output
             output += segment_output
@@ -53,10 +45,10 @@ class BaricentricLayerTf(Layer):
         return output
 
 
-class BaricentricNetworkTf(Model):
+class BaricentricSigmaNetworkTf(Model):
     def __init__(self, points, **kwargs):
-        super(BaricentricNetworkTf, self).__init__(**kwargs)
-        self.layer = BaricentricLayerTf(points)
+        super(BaricentricSigmaNetworkTf, self).__init__(**kwargs)
+        self.layer = BaricentricSigmaLayerTf(points)
 
     def call(self, x):
         return self.layer(x)
