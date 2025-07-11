@@ -28,16 +28,17 @@ class BaricentricSigmaLayerTf(Layer):
             t = (x_i - x) / (x_i - x_next)
             
             # Define contributions by segment
-            relu1up = activations.relu(t)  #
+            #hiddenlayer1
+            relu1h1 = activations.relu(t)  #
             step1 = tf.cast((-t) > 0, dtype=tf.float32)
             step2 = tf.cast((t - 1) > 0, dtype=tf.float32)
-            relu2up = activations.relu(1-relu1up-2*step1-2*step2)
+            relu2h1 = activations.relu(1-t) 
 
-            relu1ab = activations.relu(1-t)  #
-            relu2ab = activations.relu(1-relu2up-2*step1-2*step2)
+            relu1h2 = activations.relu(1-relu1h1-2*step1-2*step2)
+            relu2h2 = activations.relu(1-relu2h1-2*step1-2*step2)
             
             # Output for this segment
-            segment_output = relu2up* b_i + relu2ab * b_next
+            segment_output = relu1h2* b_i + relu2h2 * b_next
             
             # Add the segment contribution to the total output
             output += segment_output
