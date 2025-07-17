@@ -39,10 +39,8 @@ class BaricentricSigmaLayerTf(Layer):
             
             # Output for this segment
             segment_output = relu1h2* b_i + relu2h2 * b_next
-            
             # Add the segment contribution to the total output
             output += segment_output
-
         return output
 
 
