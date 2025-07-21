@@ -9,11 +9,14 @@ from utilsBaricentricNeuralNetwork import *
 from utils import *
 import yfinance as yf
 
-def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=20):
+def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=50):
+    
+    #data 1
     # x_points = tf.Variable([-10,-6.5,-3.3,-0.2,3.,6.1,9.2,10],trainable=True)
-
-    x_points = tf.Variable(tf.cast(tf.linspace(0,len(AppleCloseValues)-1,num_points_aprox), dtype=tf.float32) ,trainable=True)
-
+    #data 2
+    # x_points = tf.Variable([0,15.,35.,50.,65.,75.,85.,95,110,130,150,175,200,220,235,250],trainable=True)
+    x_points = tf.Variable(tf.cast(tf.linspace(0,len(y_train)-1,num_points_aprox), dtype=tf.float32) ,trainable=True)
+    
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.1)
 
 
@@ -78,19 +81,17 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
 # y_train = y_train + ruido
 # x_train = tf.constant(x_train,dtype=tf.float32)
 # y_train = tf.constant(y_train,dtype=tf.float32)
+# num_points_optimize = 8
 
 #data 2
-ticker_symbol = "AAPL" # Apple Inc.
-start_date = "2020-01-01"
-end_date = "2024-12-31"
-stock_data = yf.download(ticker_symbol, start=start_date, end=end_date)
-AppleCloseValues = stock_data['Close'].values
-domain =[0,AppleCloseValues.shape[0]-1]
-num_points=len(AppleCloseValues)
-x_train, y_train = np.arange(0, len(AppleCloseValues)), AppleCloseValues.reshape(-1)
+data = yf.download('GLD', start='2023-01-01', end='2024-01-01')  # ETF de oro
+prices = data['Close'].values
+domain =[0,prices.shape[0]-1]
+num_points=len(prices)
+x_train, y_train = np.arange(0, len(prices)), prices.reshape(-1)
 x_train = tf.constant(x_train,dtype=tf.float32)
 y_train = tf.constant(y_train,dtype=tf.float32)
-
+num_points_optimize = 16
 
 # Topología base
 stbase = gd.SimplexTree()
@@ -102,8 +103,7 @@ dgmRef = dgmsRef[0][0]
 entropyRef=persistent_entropy_tf(dgmRef)
 entropyRefLim=persistent_entropy_lim_tf(dgmRef)
 
-num_points_optimize = 24
-# print(dgmRef) 
+ 
 distances = tf.abs(dgmRef[:, 0] - dgmRef[:, 1])  # (n,)
 top_x_indices = tf.argsort(distances, direction='DESCENDING')[:int(num_points_optimize/2)]
 dgmRefFilt = tf.gather(dgmRef, top_x_indices)
@@ -133,15 +133,40 @@ with pd.ExcelWriter("learning_curves_comparison.xlsx") as writer:
     for name, df in resultados.items():
         df.to_excel(writer, sheet_name=name, index=False)
 
+print(resultados)
+
 # # Visualización
-# plt.figure(figsize=(12, 6))
-# for name, df in resultados.items():
-#     plt.plot(df["epoch"], df["loss"], label=f"{name}")
-# plt.xlabel("Época")
-# plt.ylabel("Loss")
-# plt.title("Curvas de aprendizaje - Comparación de funciones de pérdida")
-# plt.legend()
-# plt.grid()
-# plt.tight_layout()
-# plt.savefig("loss_curves.png")
-# plt.show()
+fig,axes = plt.subplots(nrows=2,ncols=3,figsize=(12, 12))
+for name, df in resultados.items():
+    axes[0,0].plot(df["epoch"], df["mse"],"--", label=f"{name}")
+    axes[0,1].plot(df["epoch"], df["rmse"],"--", label=f"{name}")
+    axes[0,2].plot(df["epoch"], df["mae"],"--", label=f"{name}")
+    axes[1,0].plot(df["epoch"], df["logcosh"],"--", label=f"{name}")
+    axes[1,1].plot(df["epoch"], df["entropyLim"],"--", label=f"{name}")
+
+axes[0,0].set_title("Learning curves - MSE")
+axes[0,1].set_title("Learning curves - RMSE")
+axes[0,2].set_title("Learning curves - MAE")
+axes[1,0].set_title("Learning curves - LogCosh")
+axes[1,1].set_title("Learning curves - Persistent Entropy Lim")
+axes[0,0].set_xlabel("Epochs")
+axes[0,1].set_xlabel("Epochs")  
+axes[0,2].set_xlabel("Epochs")
+axes[1,0].set_xlabel("Epochs")
+axes[1,1].set_xlabel("Epochs")
+axes[0,0].set_ylabel("MSE")
+axes[0,1].set_ylabel("RMSE")
+axes[0,2].set_ylabel("MAE")
+axes[1,0].set_ylabel("LogCosh")
+axes[1,1].set_ylabel("Persistent Entropy Lim")
+plt.suptitle("Curvas de aprendizaje - Comparación de funciones de pérdida")
+axes[0,0].legend(title="Loss function")
+axes[0,1].legend(title="Loss function")
+axes[0,2].legend(title="Loss function")
+axes[1,0].legend(title="Loss function")
+axes[1,1].legend(title="Loss function")
+axes[1,2].remove()
+
+plt.subplots_adjust(wspace=0.2, hspace=0.35)
+plt.savefig("loss_curves.png")
+plt.show()
