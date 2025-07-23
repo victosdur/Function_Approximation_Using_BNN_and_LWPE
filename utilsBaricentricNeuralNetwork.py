@@ -1,5 +1,5 @@
 import numpy as np
-from tensorflow import Model
+from tensorflow.keras import Model # for version 3.9.13 (the one everything has been tested). For 3.10.0 and above, use `from tensorflow import Model`
 import tensorflow as tf
 
 

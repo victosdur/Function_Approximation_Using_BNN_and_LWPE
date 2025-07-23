@@ -12,6 +12,7 @@ import yfinance as yf
 def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=50):
     
     #data 1
+    # x_points = tf.Variable(tf.cast(tf.linspace(-10,10,num_points_aprox), dtype=tf.float32) ,trainable=True)
     # x_points = tf.Variable([-10,-6.5,-3.3,-0.2,3.,6.1,9.2,10],trainable=True)
     #data 2
     # x_points = tf.Variable([0,15.,35.,50.,65.,75.,85.,95,110,130,150,175,200,220,235,250],trainable=True)
@@ -35,8 +36,8 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
             tape.watch(x_points)
             y_points = interpolation_tf(x_train, y_train, x_points)
             points = tf.stack([x_points, y_points], axis=1)
-            model = BaricentricSigmaNetworkTf(points)
-            y_aprox = model(x_train)
+            model = BaricentricNetwork(points)
+            y_aprox = model(tf.expand_dims(x_train,axis=1))
             dgmsAprox = layer.call(y_aprox)
             dgmAprox = dgmsAprox[0][0]
 
@@ -83,7 +84,7 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
 # y_train = tf.constant(y_train,dtype=tf.float32)
 # num_points_optimize = 8
 
-#data 2
+# #data 2
 data = yf.download('GLD', start='2023-01-01', end='2024-01-01')  # ETF de oro
 prices = data['Close'].values
 domain =[0,prices.shape[0]-1]
@@ -91,7 +92,7 @@ num_points=len(prices)
 x_train, y_train = np.arange(0, len(prices)), prices.reshape(-1)
 x_train = tf.constant(x_train,dtype=tf.float32)
 y_train = tf.constant(y_train,dtype=tf.float32)
-num_points_optimize = 16
+num_points_optimize = 30
 
 # Topología base
 stbase = gd.SimplexTree()
@@ -160,11 +161,7 @@ axes[0,2].set_ylabel("MAE")
 axes[1,0].set_ylabel("LogCosh")
 axes[1,1].set_ylabel("Persistent Entropy Lim")
 plt.suptitle("Curvas de aprendizaje - Comparación de funciones de pérdida")
-axes[0,0].legend(title="Loss function")
-axes[0,1].legend(title="Loss function")
-axes[0,2].legend(title="Loss function")
-axes[1,0].legend(title="Loss function")
-axes[1,1].legend(title="Loss function")
+axes[1,1].legend(title="Loss function", bbox_to_anchor=(1.05, 0.5), loc='center left')
 axes[1,2].remove()
 
 plt.subplots_adjust(wspace=0.2, hspace=0.35)
