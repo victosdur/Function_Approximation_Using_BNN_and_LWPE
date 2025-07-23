@@ -3,5 +3,9 @@ python=3.10
 Drafts.ipynb
 .ipynb_checkpoints
 __pycache__
-BNNRepresentation.ipynb
+BNNastypicalNN.ipynb
 mitdb
+DelauneyCalculation.ipynb
+ApplicationElectro.ipynb
+ApplicationFinantialData.ipynb
+testTools.ipynb

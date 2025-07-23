@@ -129,7 +129,7 @@ for name, loss_fn in loss_functions.items():
     print(f"Resultados guardados para perdida {name}")
 
 # Guardar a Excel
-with pd.ExcelWriter("learning_curves_comparison.xlsx") as writer:
+with pd.ExcelWriter("results/learning_curves_comparison.xlsx") as writer:
     for name, df in resultados.items():
         df.to_excel(writer, sheet_name=name, index=False)
 
@@ -168,5 +168,5 @@ axes[1,1].legend(title="Loss function")
 axes[1,2].remove()
 
 plt.subplots_adjust(wspace=0.2, hspace=0.35)
-plt.savefig("loss_curves.png")
+plt.savefig("figures/loss_curves.png")
 plt.show()
