@@ -28,25 +28,25 @@ pip install ipykernel
 
 ## Repository structure
 
-- `utilsBaricentricNeuralNetwork.py`: Contains the implementation of the Baricentric Neural Network, as proposed in the paper, available in TensorFlow framework.
+- `utilsBaricentricNeuralNetwork.py`: It contains the implementation of the proposed Barycentric Neural Network (BNN) in TensorFlow framework.
 
-- `utilsTopology.py`: Provides the necessary topological tools used in the experiments.
+- `utilsTopology.py`: It provides the topological tools necessary for the experiments.
 
-- `utils.py`: Contains necessary function used in the experiments.
+- `utils.py`: It contains some necessary functions used in the experiments.
 
-- `RepresentCPLF_BNN.ipynb`: Includes experiments on representing certain CPLFs (Continuous Piecewise Linear Functions) using the proposed Baricentric Neural Network.
+- `RepresentCPLF_BNN.ipynb`: It includes experiments on representing certain continuous piecewise linear functions (CPLFs) using the proposed barycentric neural network.
 
-- `AproxContinuousFunction_BNN.ipynb`: Contains experiments on approximating continuous functions using the proposed Baricentric Neural Network.
+- `AproxContinuousFunction_BNN.ipynb`: It contains experiments on approximating continuous functions using the proposed Baricentric Neural Network.
 
-- `Compare_PELoss`: Contains comparison between different variants of persistent entropy (normal persistent entropy (PE) and length weighted persistent entropy (LWPE), which is our variant), in order to detect which is the best for the usage of it as loss function.
+- `Compare_PELoss`: It contains a comparison between different variants of persistent entropy, such as normal persistent entropy (PE) and length-weighted persistent entropy (LWPE), which we have developed. The aim is to determine which variant is best suited to use as a loss function.
 
-- `ApproximatingFunctionsUsingBNN_ComparisonMSEandLWPE.ipynb`: Contains experiments aimed at optimizing the fixed points used to construct the Baricentric Neural Network that approximates continuous functions in the Tensorflow framework using LWPE as loss function. Also compare the persistent entropy-based loss function proposed with the MSE loss function.
+- `ApproximatingFunctionsUsingBNN_ComparisonMSEandLWPE.ipynb`: This contains experiments aimed at optimising the base points used to construct the barycentric neural network that approximates continuous functions in the TensorFlow framework using the LWPE loss function. It also compares the proposed persistent entropy-based loss function (LWPE) with the mean squared error (MSE) loss function.
 
-- `experimentsComparingLossFunction.py`: Contains experiments aimed at optimizing the fixed points used to construct the Baricentric Neural Network that approximates continuous functions in the Tensorflow framework, comparing different loss functions (MSE, RMSE, MAE, Logcosh, Persistent Entropy (LWPE)).
+- `experimentsComparingLossFunction.py`: It contains experiments aimed at optimising the base points used to construct the barycentric neural network that approximates continuous functions. It compares different loss functions (mean squared error (MSE), root mean squared error (RMSE), mean absolute error (MAE), logcosh and our persistent entropy variant (LWPE)).
 
-- `results`: Contains the results of the different loss function at the time of running previous script.
+- `results`: It contains the results of the different loss functions at the time the previous script was run.
 
-- `FiguresPaper`: Contains the code to generate illustrative figures that appear in the paper. These figures are saved in the `figures` folder, along with other figures generated in the experimental notebooks that have been commented.
+- `FiguresPaper`: This contains the code used to generate the illustrative figures that appear in the paper. These figures are saved in the 'figures' folder, alongside other figures that have been commented on and generated in the experimental notebooks.
 
 
 ## Citation and Reference

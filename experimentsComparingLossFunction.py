@@ -9,7 +9,7 @@ from utilsBaricentricNeuralNetwork import *
 from utils import *
 import yfinance as yf
 
-def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=50):
+def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=10):
     
     #data 1
     # x_points = tf.Variable(tf.cast(tf.linspace(-10,10,num_points_aprox), dtype=tf.float32) ,trainable=True)
@@ -31,7 +31,7 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
         "logcosh": [],
         "LWPE": [],
     }
-
+    best_loss_value = float('inf')
     for epoch in tqdm(range(num_iter), desc=f"Training with {loss_name}"):
         with tf.GradientTape() as tape:
             tape.watch(x_points)
@@ -47,21 +47,36 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
             elif loss_name == "rmse":
                 loss_value = tf.sqrt((loss_functions[loss_name](y_train, y_aprox)))
             else:
-                loss_value = tf.reduce_mean(loss_functions[loss_name](y_train, y_aprox))
+                loss_value = loss_functions[loss_name](y_train, y_aprox)
 
         gradients = tape.gradient(loss_value, [x_points])
         # print(gradients)
         gradients[0] = tf.tensor_scatter_nd_update(gradients[0], [[0], [num_points_aprox - 1]], [0.0, 0.0])
-        optimizer.apply_gradients(zip(gradients, [x_points]))
 
-        # Calcular métricas
+
+        if epoch == 0:
+            initial_model = model
+            initial_x_points = tf.identity(x_points)
+            initial_y_points = tf.identity(y_points)
+        
+        optimizer.apply_gradients(zip(gradients, [x_points]))
+        if loss_value.numpy().item() < best_loss_value:
+            best_loss_value = loss_value.numpy().item()
+            best_x_points = tf.identity(x_points)
+            best_y_points = tf.identity(y_points)
+            best_model = model
+            best_iter = epoch
+        if epoch == num_iter - 1:
+            last_model = model
+            last_x_points = tf.identity(x_points)
+            last_y_points = tf.identity(y_points)
+
         mse_val = loss_functions["mse"](y_train, y_aprox).numpy()
         mae_val = loss_functions["mae"](y_train, y_aprox).numpy()
-        rmse_val = tf.sqrt(loss_functions["mse"](y_train, y_aprox)).numpy()
+        rmse_val = tf.sqrt(loss_functions["rmse"](y_train, y_aprox)).numpy()
         logcosh_val = loss_functions["logcosh"](y_train, y_aprox).numpy()
         LWPE_val = loss_functions["persistent_entropy"](dgmRef,dgmAprox).numpy().item()
     
-        # Guardar en histórico
         history["epoch"].append(epoch)
         history["loss"].append(loss_name)
         if loss_name == "persistent_entropy":
@@ -74,8 +89,37 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
         history["logcosh"].append(logcosh_val)
         history["LWPE"].append(LWPE_val)
 
-    return pd.DataFrame(history)
+    fig, axs = plt.subplots(1, 3, figsize=(16, 8), sharex=True, sharey=True)
+    axs[0].plot(x_train, initial_model(tf.expand_dims(x_train,axis=1)), 'r-', alpha=0.5)
+    axs[0].plot(x_train, y_train, 'g-', alpha=0.5)
+    axs[0].scatter(initial_x_points, initial_y_points, color="red", label="BNN Points creation")
+    axs[0].set_xlabel('x', fontsize=fontsize)
+    axs[0].set_ylabel('y', fontsize=fontsize)
+    axs[0].set_xlim((domain[0],domain[1]))
+    axs[0].set_title(f'Initial iter with random points',fontsize=14)
+    # axs[0].legend(loc="lower left",fontsize=12, framealpha=0.5)
+    axs[1].plot(x_train, best_model(tf.expand_dims(x_train,axis=1)), 'r-', alpha=0.5)
+    axs[1].plot(x_train, y_train, 'g-', alpha=0.5)
+    axs[1].scatter(best_x_points, best_y_points, color="red", label="BNN Points creation")
+    axs[1].set_xlabel('x', fontsize=fontsize)
+    axs[1].set_ylabel('y', fontsize=fontsize)
+    axs[1].set_xlim((domain[0],domain[1]))
+    axs[1].set_title(f'Best iter: {best_iter}',fontsize=14)
+    # axs[1].legend(loc="lower left",fontsize=12, framealpha=0.5)
+    axs[2].plot(x_train, last_model(tf.expand_dims(x_train,axis=1)), 'r-', alpha=0.5)
+    axs[2].plot(x_train, y_train, 'g-', alpha=0.5)
+    axs[2].scatter(last_x_points, last_y_points, color="red", label="BNN Points creation")
+    axs[2].set_xlabel('x', fontsize=fontsize)
+    axs[2].set_ylabel('y', fontsize=fontsize)
+    axs[2].set_xlim((domain[0],domain[1]))
+    axs[2].set_title(f'Last iter, n: {num_iter-1}',fontsize=14)
+    # axs[2].legend(loc="lower left",fontsize=12, framealpha=0.5)
+    plt.suptitle("Point-cloud-based function approximation with BNN",fontsize=16)
+    plt.savefig(f'results/ApproximationPlots_{loss_name}.png', dpi=300, bbox_inches='tight')
+    plt.tight_layout()
+    plt.close()
 
+    return pd.DataFrame(history)
 
 # data 1
 # domain =[-10,10]
@@ -99,7 +143,6 @@ x_train = tf.constant(x_train,dtype=tf.float32)
 y_train = tf.constant(y_train,dtype=tf.float32)
 num_points_optimize = 30
 
-# Topología base
 stbase = gd.SimplexTree()
 for i in range(num_points - 1):
     stbase.insert([i, i + 1], -1e10)
@@ -116,7 +159,6 @@ dgmRefFilt = tf.gather(dgmRef, top_x_indices)
 PERefFilt=persistent_entropy(dgmRefFilt)
 LWPERefFilt=length_weighted_persistent_entropy(dgmRefFilt)
 
-# Lista de funciones de pérdida
 loss_functions = {
     "persistent_entropy": LengthWeightedPersistentEntropyLoss(),
     "mse": tf.keras.losses.MeanSquaredError(),
@@ -126,7 +168,6 @@ loss_functions = {
 
 }
 
-# Entrenamiento y almacenamiento
 resultados = {}
 for name, loss_fn in loss_functions.items():
     print(f"Entrenando con la función de pérdida: {name}")
@@ -134,14 +175,12 @@ for name, loss_fn in loss_functions.items():
     resultados[name] = df_result
     print(f"Resultados guardados para perdida {name}")
 
-# Guardar a Excel
 with pd.ExcelWriter("results/learning_curves_comparison.xlsx") as writer:
     for name, df in resultados.items():
         df.to_excel(writer, sheet_name=name, index=False)
 
 print(resultados)
 
-# # Visualización
 fig,axes = plt.subplots(nrows=2,ncols=3,figsize=(12, 12))
 for name, df in resultados.items():
     axes[0,0].plot(df["epoch"], df["mse"],"--", label=f"{name}")
