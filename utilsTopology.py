@@ -23,7 +23,7 @@ def plot_persistent_barcode(tensor, nameSave=None, ax=None):
     if ax is None and nameSave is not None:
         plt.savefig(nameSave, dpi=300, bbox_inches="tight")
 
-# function for compute PE from persistence barcode
+# function for compute PE (without tensorflow, just for test the development in tensorflow) from persistence barcode
 def computePersistenceEntropy(persistentBarcode):
     l=[]
     for i in persistentBarcode:
@@ -34,7 +34,7 @@ def computePersistenceEntropy(persistentBarcode):
     return entropia # round(entropia,4)
 
 # Persistent entropy calculation in TensorFlow
-def persistent_entropy_tf(D):
+def persistent_entropy(D):
     persistence = tf.experimental.numpy.diff(D)
     persistence = tf.boolean_mask(tf.abs(persistence), tf.math.is_finite(persistence))
     
@@ -48,7 +48,8 @@ def persistent_entropy_tf(D):
     
     return -tf.reduce_sum(probabilities * log_prob)
 
-def persistent_entropy_lim_tf(D):
+# Length-weighted persistent entropy calculation in TensorFlow
+def length_weighted_persistent_entropy(D):
     persistence = tf.experimental.numpy.diff(D)
     persistence = tf.boolean_mask(tf.abs(persistence), tf.math.is_finite(persistence))
     
@@ -63,20 +64,21 @@ def persistent_entropy_lim_tf(D):
     return -tf.reduce_sum(persistence * log_prob)
     
 # Persistent entropy loss function in TensorFlow
-class PersistentEntropyLossTF(tf.keras.losses.Loss):
+class PersistentEntropyLoss(tf.keras.losses.Loss):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.stat_fn = persistent_entropy_tf
+        self.stat_fn = persistent_entropy
     
     def call(self, X, Y):
         stat_ref = self.stat_fn(X)
         stat_aprox = self.stat_fn(Y)
         return tf.abs(stat_aprox - stat_ref)
 
-class PersistentEntropyLossLimTF(tf.keras.losses.Loss):
+# Length-weighted persistent entropy loss function in TensorFlow
+class LengthWeightedPersistentEntropyLoss(tf.keras.losses.Loss):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.stat_fn = persistent_entropy_lim_tf
+        self.stat_fn = length_weighted_persistent_entropy
     
     def call(self, X, Y):
         stat_ref = self.stat_fn(X)

@@ -1,4 +1,4 @@
-This repository contains data and experiments associated to the paper: "Barycentric Neural Networks for Function Approximation: A Green AI Approach Using Persistent Entropy Loss". European Conference on Machine Learning and Principles and Practice of Knowledge Discovery in Databases 2025 [ECML PKDD 2025](https://ecmlpkdd.org/2025/).
+This repository contains data and experiments associated to the paper: Toscano-Duran,V., Gonzalez-Diaz,R., and Gutiérrez-Naranjo, M.A., "Barycentric Neural Networks for Function Approximation: A Green AI Approach Using Persistent Entropy Loss".
 
 ## Usage
 
@@ -28,23 +28,26 @@ pip install ipykernel
 
 ## Repository structure
 
-- `utilsBaricentricNeuralNetwork.py`: Contains the implementation of the Baricentric Neural Network, as proposed in the paper, available TensorFlow framework.
+- `utilsBaricentricNeuralNetwork.py`: Contains the implementation of the Baricentric Neural Network, as proposed in the paper, available in TensorFlow framework.
 
-- `utilsTopology.py`: Provides the necessary tools for topology and topological data analysis used in the experiments.
+- `utilsTopology.py`: Provides the necessary topological tools used in the experiments.
 
-- `utils.py`: Contains  necessary function to run some of the following experiments (notebooks).
+- `utils.py`: Contains necessary function used in the experiments.
 
 - `RepresentCPLF_BNN.ipynb`: Includes experiments on representing certain CPLFs (Continuous Piecewise Linear Functions) using the proposed Baricentric Neural Network.
 
 - `AproxContinuousFunction_BNN.ipynb`: Contains experiments on approximating continuous functions using the proposed Baricentric Neural Network.
 
-- `Compare_PELoss`: Contains comparison between different variants of persistent entropy (normal persistent entropy and limit persistent entropy, which is our variant), in order to detect which is the best for the usage of it as loss function.
+- `Compare_PELoss`: Contains comparison between different variants of persistent entropy (normal persistent entropy (PE) and length weighted persistent entropy (LWPE), which is our variant), in order to detect which is the best for the usage of it as loss function.
 
-- `OptimizePoints.ipynb`: Contains experiments aimed at optimizing the fixed points used to construct the Baricentric Neural Network that approximates continuous functions in the Tensorflow framework using persistent entropy as loss function. Also compare the persistent entropy-based loss function proposed with the MSE loss function.
+- `ApproximatingFunctionsUsingBNN_ComparisonMSEandLWPE.ipynb`: Contains experiments aimed at optimizing the fixed points used to construct the Baricentric Neural Network that approximates continuous functions in the Tensorflow framework using LWPE as loss function. Also compare the persistent entropy-based loss function proposed with the MSE loss function.
+
+- `experimentsComparingLossFunction.py`: Contains experiments aimed at optimizing the fixed points used to construct the Baricentric Neural Network that approximates continuous functions in the Tensorflow framework, comparing different loss functions (MSE, RMSE, MAE, Logcosh, Persistent Entropy (LWPE)).
+
+- `results`: Contains the results of the different loss function at the time of running previous script.
 
 - `FiguresPaper`: Contains the code to generate illustrative figures that appear in the paper. These figures are saved in the `figures` folder, along with other figures generated in the experimental notebooks that have been commented.
 
-- `BNNastypicalNN.ipynb`: Shows a simple example of how to compute the BNN as a typical neural network using the Dense layers of Tensorflow frameworks.
 
 ## Citation and Reference
 

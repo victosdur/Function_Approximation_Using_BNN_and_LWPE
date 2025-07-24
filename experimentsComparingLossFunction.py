@@ -24,11 +24,12 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
     history = {
         "epoch": [],
         "loss": [],
+        "lossValue": [],
         "mse": [],
         "rmse": [],
         "mae": [],
         "logcosh": [],
-        "entropyLim": [],
+        "LWPE": [],
     }
 
     for epoch in tqdm(range(num_iter), desc=f"Training with {loss_name}"):
@@ -54,20 +55,24 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
         optimizer.apply_gradients(zip(gradients, [x_points]))
 
         # Calcular métricas
-        mse_val = tf.reduce_mean(tf.keras.losses.MSE(y_train, y_aprox)).numpy()
-        mae_val = tf.reduce_mean(tf.keras.losses.MAE(y_train, y_aprox)).numpy()
-        rmse_val = tf.sqrt(tf.reduce_mean(tf.square(y_train - y_aprox))).numpy()
-        logcosh_val = tf.reduce_mean(tf.keras.losses.logcosh(y_train, y_aprox)).numpy()
-        entropyLim_val = loss_functions["persistent_entropy"](dgmRef,dgmAprox).numpy().item()
-
+        mse_val = loss_functions["mse"](y_train, y_aprox).numpy()
+        mae_val = loss_functions["mae"](y_train, y_aprox).numpy()
+        rmse_val = tf.sqrt(loss_functions["mse"](y_train, y_aprox)).numpy()
+        logcosh_val = loss_functions["logcosh"](y_train, y_aprox).numpy()
+        LWPE_val = loss_functions["persistent_entropy"](dgmRef,dgmAprox).numpy().item()
+    
         # Guardar en histórico
         history["epoch"].append(epoch)
         history["loss"].append(loss_name)
+        if loss_name == "persistent_entropy":
+            history["lossValue"].append(loss_value.numpy().item())
+        else:
+            history["lossValue"].append(loss_value.numpy())
         history["mse"].append(mse_val)
         history["mae"].append(mae_val)
         history["rmse"].append(rmse_val)
         history["logcosh"].append(logcosh_val)
-        history["entropyLim"].append(entropyLim_val)
+        history["LWPE"].append(LWPE_val)
 
     return pd.DataFrame(history)
 
@@ -101,19 +106,19 @@ for i in range(num_points - 1):
 layer = LowerStarLayer(simplextree=stbase)
 dgmsRef = layer.call(tf.Variable(y_train))
 dgmRef = dgmsRef[0][0]
-entropyRef=persistent_entropy_tf(dgmRef)
-entropyRefLim=persistent_entropy_lim_tf(dgmRef)
+PERef=persistent_entropy(dgmRef)
+LWPEref=length_weighted_persistent_entropy(dgmRef)
 
  
 distances = tf.abs(dgmRef[:, 0] - dgmRef[:, 1])  # (n,)
 top_x_indices = tf.argsort(distances, direction='DESCENDING')[:int(num_points_optimize/2)]
 dgmRefFilt = tf.gather(dgmRef, top_x_indices)
-entropyRefFilt=persistent_entropy_tf(dgmRefFilt)
-entropyRefFiltLim=persistent_entropy_lim_tf(dgmRefFilt)
+PERefFilt=persistent_entropy(dgmRefFilt)
+LWPERefFilt=length_weighted_persistent_entropy(dgmRefFilt)
 
 # Lista de funciones de pérdida
 loss_functions = {
-    "persistent_entropy": PersistentEntropyLossLimTF(),
+    "persistent_entropy": LengthWeightedPersistentEntropyLoss(),
     "mse": tf.keras.losses.MeanSquaredError(),
     "rmse": tf.keras.losses.MeanSquaredError(),
     "mae": tf.keras.losses.MeanAbsoluteError(),
@@ -143,13 +148,13 @@ for name, df in resultados.items():
     axes[0,1].plot(df["epoch"], df["rmse"],"--", label=f"{name}")
     axes[0,2].plot(df["epoch"], df["mae"],"--", label=f"{name}")
     axes[1,0].plot(df["epoch"], df["logcosh"],"--", label=f"{name}")
-    axes[1,1].plot(df["epoch"], df["entropyLim"],"--", label=f"{name}")
+    axes[1,1].plot(df["epoch"], df["LWPE"],"--", label=f"{name}")
 
 axes[0,0].set_title("Learning curves - MSE")
 axes[0,1].set_title("Learning curves - RMSE")
 axes[0,2].set_title("Learning curves - MAE")
 axes[1,0].set_title("Learning curves - LogCosh")
-axes[1,1].set_title("Learning curves - Persistent Entropy Lim")
+axes[1,1].set_title("Learning curves - LWPE")
 axes[0,0].set_xlabel("Epochs")
 axes[0,1].set_xlabel("Epochs")  
 axes[0,2].set_xlabel("Epochs")
@@ -159,11 +164,11 @@ axes[0,0].set_ylabel("MSE")
 axes[0,1].set_ylabel("RMSE")
 axes[0,2].set_ylabel("MAE")
 axes[1,0].set_ylabel("LogCosh")
-axes[1,1].set_ylabel("Persistent Entropy Lim")
-plt.suptitle("Curvas de aprendizaje - Comparación de funciones de pérdida")
+axes[1,1].set_ylabel("LWPE")
+plt.suptitle("Learning Curves Comparison", fontsize=16)
 axes[1,1].legend(title="Loss function", bbox_to_anchor=(1.05, 0.5), loc='center left')
 axes[1,2].remove()
 
 plt.subplots_adjust(wspace=0.2, hspace=0.35)
-plt.savefig("figures/loss_curves.png")
+plt.savefig("figures/learning_loss_curves.png")
 plt.show()
