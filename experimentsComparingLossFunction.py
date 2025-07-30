@@ -9,7 +9,7 @@ from utilsBaricentricNeuralNetwork import *
 from utils import *
 import yfinance as yf
 
-def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=10):
+def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, num_iter=50):
     
     #data 1
     # x_points = tf.Variable(tf.cast(tf.linspace(-10,10,num_points_aprox), dtype=tf.float32) ,trainable=True)
@@ -89,35 +89,12 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
         history["logcosh"].append(logcosh_val)
         history["LWPE"].append(LWPE_val)
 
-    fig, axs = plt.subplots(1, 3, figsize=(16, 8), sharex=True, sharey=True)
-    axs[0].plot(x_train, initial_model(tf.expand_dims(x_train,axis=1)), 'r-', alpha=0.5)
-    axs[0].plot(x_train, y_train, 'g-', alpha=0.5)
-    axs[0].scatter(initial_x_points, initial_y_points, color="red", label="BNN Points creation")
-    axs[0].set_xlabel('x', fontsize=fontsize)
-    axs[0].set_ylabel('y', fontsize=fontsize)
-    axs[0].set_xlim((domain[0],domain[1]))
-    axs[0].set_title(f'Initial iter with random points',fontsize=14)
-    # axs[0].legend(loc="lower left",fontsize=12, framealpha=0.5)
-    axs[1].plot(x_train, best_model(tf.expand_dims(x_train,axis=1)), 'r-', alpha=0.5)
-    axs[1].plot(x_train, y_train, 'g-', alpha=0.5)
-    axs[1].scatter(best_x_points, best_y_points, color="red", label="BNN Points creation")
-    axs[1].set_xlabel('x', fontsize=fontsize)
-    axs[1].set_ylabel('y', fontsize=fontsize)
-    axs[1].set_xlim((domain[0],domain[1]))
-    axs[1].set_title(f'Best iter: {best_iter}',fontsize=14)
-    # axs[1].legend(loc="lower left",fontsize=12, framealpha=0.5)
-    axs[2].plot(x_train, last_model(tf.expand_dims(x_train,axis=1)), 'r-', alpha=0.5)
-    axs[2].plot(x_train, y_train, 'g-', alpha=0.5)
-    axs[2].scatter(last_x_points, last_y_points, color="red", label="BNN Points creation")
-    axs[2].set_xlabel('x', fontsize=fontsize)
-    axs[2].set_ylabel('y', fontsize=fontsize)
-    axs[2].set_xlim((domain[0],domain[1]))
-    axs[2].set_title(f'Last iter, n: {num_iter-1}',fontsize=14)
-    # axs[2].legend(loc="lower left",fontsize=12, framealpha=0.5)
-    plt.suptitle("Point-cloud-based function approximation with BNN",fontsize=16)
-    plt.savefig(f'results/ApproximationPlots_{loss_name}.png', dpi=300, bbox_inches='tight')
-    plt.tight_layout()
-    plt.close()
+    plot_and_save_approximation(model=initial_model,x_train=x_train,y_train=y_train,x_points=initial_x_points,y_points=initial_y_points,
+                         domain=domain,title='Initial iter approximation',filename=f'results/InitialApproximation_{loss_name}.png',fontsize=fontsize)
+    plot_and_save_approximation(model=best_model,x_train=x_train,y_train=y_train,x_points=best_x_points,y_points=best_y_points,
+                         domain=domain,title=f'Best iter ({best_iter}) approximation',filename=f'results/BestApproximation_{loss_name}.png',fontsize=fontsize)
+    plot_and_save_approximation(model=last_model,x_train=x_train,y_train=y_train,x_points=last_x_points,y_points=last_y_points,
+                         domain=domain,title='Last iter approximation',filename=f'results/LastApproximation_{loss_name}.png',fontsize=fontsize)
 
     return pd.DataFrame(history)
 
@@ -204,10 +181,10 @@ axes[0,1].set_ylabel("RMSE")
 axes[0,2].set_ylabel("MAE")
 axes[1,0].set_ylabel("LogCosh")
 axes[1,1].set_ylabel("LWPE")
-plt.suptitle("Learning Curves Comparison", fontsize=16)
+# plt.suptitle("Learning Curves Comparison", fontsize=16)
 axes[1,1].legend(title="Loss function", bbox_to_anchor=(1.05, 0.5), loc='center left')
 axes[1,2].remove()
 
-plt.subplots_adjust(wspace=0.2, hspace=0.35)
+plt.subplots_adjust(wspace=0.3, hspace=0.35)
 plt.savefig("figures/learning_loss_curves.png")
 plt.show()

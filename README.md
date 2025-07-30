@@ -38,7 +38,7 @@ pip install ipykernel
 
 - `AproxContinuousFunction_BNN.ipynb`: It contains experiments on approximating continuous functions using the proposed Baricentric Neural Network.
 
-- `Compare_PELoss`: It contains a comparison between different variants of persistent entropy, such as normal persistent entropy (PE) and length-weighted persistent entropy (LWPE), which we have developed. The aim is to determine which variant is best suited to use as a loss function.
+- `Compare_PEVariants_forLoss`: It contains a comparison between different variants of persistent entropy, such as normal persistent entropy (PE) and length-weighted persistent entropy (LWPE), which we have developed. The aim is to determine which variant is best suited to use as a loss function.
 
 - `ApproximatingFunctionsUsingBNN_ComparisonMSEandLWPE.ipynb`: This contains experiments aimed at optimising the base points used to construct the barycentric neural network that approximates continuous functions in the TensorFlow framework using the LWPE loss function. It also compares the proposed persistent entropy-based loss function (LWPE) with the mean squared error (MSE) loss function.
 

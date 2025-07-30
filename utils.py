@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 # generate data using a function depending their domain and number of samples
 def generate_training_data(f, x_range, num_samples):
@@ -32,3 +33,17 @@ def interpolation_tf(x, y, x_points):
     y_points = tf.where(mask_exact, exact_values, y_points)
     
     return y_points
+
+def plot_and_save_approximation(model, x_train, y_train, x_points, y_points, domain, title, filename, fontsize=14):
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_train, model(tf.expand_dims(x_train, axis=1)), 'r-', alpha=0.5, label="BNN(x)")
+    plt.plot(x_train, y_train, 'g-', alpha=0.5, label="$f(x)$")
+    plt.scatter(x_points, y_points, color="red", label="BNN base points")
+    plt.xlabel('x', fontsize=fontsize)
+    plt.ylabel('y', fontsize=fontsize)
+    plt.xlim((domain[0], domain[1]))
+    plt.title(title, fontsize=fontsize+1)
+    plt.legend(loc="lower left", fontsize=fontsize-2, framealpha=0.5)
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
