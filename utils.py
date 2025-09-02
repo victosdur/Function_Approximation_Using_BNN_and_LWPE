@@ -34,7 +34,7 @@ def interpolation_tf(x, y, x_points):
     
     return y_points
 
-def plot_and_save_approximation(model, x_train, y_train, x_points, y_points, domain, title, filename, fontsize=14):
+def plot_and_save_approximation(model, x_train, y_train, x_points, y_points, domain, filename, title=None, fontsize=14):
     plt.figure(figsize=(8, 6))
     plt.plot(x_train, model(tf.expand_dims(x_train, axis=1)), 'r-', alpha=0.5, label="BNN(x)")
     plt.plot(x_train, y_train, 'g-', alpha=0.5, label="$f(x)$")
@@ -42,7 +42,8 @@ def plot_and_save_approximation(model, x_train, y_train, x_points, y_points, dom
     plt.xlabel('x', fontsize=fontsize)
     plt.ylabel('y', fontsize=fontsize)
     plt.xlim((domain[0], domain[1]))
-    plt.title(title, fontsize=fontsize+1)
+    if title is not None:
+        plt.title(title, fontsize=fontsize+1)
     plt.legend(loc="lower left", fontsize=fontsize-2, framealpha=0.5)
     plt.tight_layout()
     plt.savefig(filename, dpi=300, bbox_inches='tight')
