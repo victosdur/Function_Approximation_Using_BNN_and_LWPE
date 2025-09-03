@@ -67,14 +67,13 @@ class BaricentricNetwork(Model):
     def call(self, x):
         outputs = [subnet(x) for subnet in self.subnets]  # List of outputs from each subnet
 
+        # 1st way, divided by num of active subnets
         outputs_stack = tf.stack(outputs, axis=0)  # Shape: [num_subnets, batch_size]
         active_mask = tf.cast(outputs_stack > 0, dtype=tf.float32)  
         sum_outputs = tf.reduce_sum(outputs_stack, axis=0)
         num_active = tf.reduce_sum(active_mask, axis=0)  # [batch_size]
-
         # Avoid division by zero
         num_active = tf.maximum(num_active, 1.0)
-
         # Final prediction: average if multiple subnets are active (joining point, otherwise just the active one)
         final_output = sum_outputs / num_active  # [batch_size]
         

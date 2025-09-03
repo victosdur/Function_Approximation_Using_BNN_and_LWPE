@@ -22,7 +22,6 @@ def train_model(x_train, y_train, loss_name, layer, dgmRef, num_points_aprox, nu
     # x_points = tf.Variable(tf.cast(tf.linspace(-10,10,num_points_aprox), dtype=tf.float32) ,trainable=True)
     x_points = tf.Variable([-10,-6.5,-3.3,-0.2,3.,6.1,9.2,10],trainable=True)
     #data 2
-    # x_points = tf.Variable([0,15.,35.,50.,65.,75.,85.,95,110,130,150,175,200,220,235,250],trainable=True)
     # x_points = tf.Variable(tf.cast(tf.linspace(0,len(y_train)-1,num_points_aprox), dtype=tf.float32) ,trainable=True)
     
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.1)
@@ -161,7 +160,7 @@ for name, loss_fn in loss_functions.items():
     resultados[name] = df_result
     print(f"Resultados guardados para perdida {name}")
 
-with pd.ExcelWriter(f"results/learning_curves_comparison_{data_name}.xlsx") as writer:
+with pd.ExcelWriter(f"results/learning_curves_comparison_{dataName}.xlsx") as writer:
     for name, df in resultados.items():
         df.to_excel(writer, sheet_name=name, index=False)
 
